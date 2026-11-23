@@ -1,13 +1,42 @@
 {
   "source": "https://api.open511.gov.bc.ca/events",
   "sourceLabel": "DriveBC Open511 · British Columbia",
-  "filters": {"status": "ACTIVE"},
+  "filters": {
+    "status": "ACTIVE"
+  },
   "pageSize": 500,
   "maxPages": 20,
   "timeoutSeconds": 45,
   "retentionCaptures": 120,
   "staleHours": 12,
   "historyCaptureLimit": 24,
-  "quickSearches": ["Highway 1", "Highway 5", "Highway 99", "Vancouver Island"],
-  "defaultFilters": {"query": "", "road": "", "area": "", "severity": "", "type": "", "status": "", "since": "", "change": ""}
+  "quickSearches": [
+    "Highway 1",
+    "Highway 5",
+    "Highway 99",
+    "Vancouver Island"
+  ],
+  "defaultFilters": {
+    "query": "",
+    "road": "",
+    "area": "",
+    "severity": "",
+    "type": "",
+    "status": "",
+    "since": "",
+    "change": ""
+  },
+  "map": {
+    "enabled": true,
+    "tileUrl": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    "attributionText": "© OpenStreetMap contributors",
+    "attributionUrl": "https://www.openstreetmap.org/copyright",
+    "maxZoom": 18,
+    "fitMaxZoom": 12,
+    "initialCenter": [
+      54,
+      -125
+    ],
+    "initialZoom": 5
+  }
 }
