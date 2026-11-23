@@ -1,116 +1,59 @@
-# CoolCode browser tool template
+# Road Pulse
 
-A starting point for independent tools at `coolcode.ca/<repo>/`: a working local-text
-example, responsive UI, Python standard-library build, Node tests, PR checks and Pages
-publication. No npm install is needed.
-
-## Using the example
+Dated British Columbia road observations from the official, keyless DriveBC Open511 API. Public app: **https://coolcode.ca/roadpulse/**. Source: https://github.com/jsdyer/roadpulse.
 
 <!-- coolcode:guide -->
-The first occurrence of each trimmed line keeps its place. Compare the output with the original text before copying the result.
+Search any road, town or event ID in the captured BC feed, choose an area/severity/type, and select an event to read its original report. The initial capture contains real DriveBC records; history grows after subsequent successful collections. The source's **ACTIVE** status includes future planned work. **ARCHIVED** does not necessarily mean reopened. An absent event is labelled **no longer in capture**, never reopened.
+
+Choose a dated capture and an earlier one to compare description, road state, schedule and other source fields by event ID. Timing notes quote relevant sentences from the source; no reopening date is invented. Open **Load last … captures** for an event's recent observation history. The observed timestamp and the source's last-update timestamp are separate. Schedule end times are planned, not verified actual outcomes.
+
+Use **Save capture JSON** for a portable receipt, **Export results CSV** for the filtered list, and **Import capture** to inspect a prior download locally. Imports are not uploaded or persisted. Saved filter views use only this browser's local storage. **Check latest saved capture** reloads published data; **Collect now** opens the GitHub workflow for the owner to run a fresh collection. Consult DriveBC for live travel decisions.
 <!-- /coolcode:guide -->
 
-For a real tool, replace this paragraph with one or two plain-text sentences
-about an example, a limit or how to interpret the results. Keep the source,
-coverage, refresh behaviour and a worked example in this README as appropriate.
-When updating a tool, revise any details its behaviour has changed and keep the
-homepage's shorter data-source sentence in `tool.json` accurate.
-The hub imports the marked note into the catalogue README.
+## Expand the tool
 
-## One-time template setup
+No hardcoded road whitelist: all roads in the configured feed are searchable. Edit [`web/config.json`](web/config.json), commit to `main`, and its publishing workflow refreshes the data automatically.
 
-Enable **Settings → General → Template repository** here. This repository does not
-need Pages enabled: its workflow builds/tests but intentionally skips deployment.
-New copies also skip deployment until `scripts/init.py` sets the tool ID to match
-their repository name. This lets you create the repo before configuring Pages.
+| Setting | What to change |
+|---|---|
+| `quickSearches` | Any array of text queries, e.g. `"Highway 16"`, `"Golden"`. Shortcuts do not restrict the data. |
+| `defaultFilters` | Initial `query`, `road`, `area`, `severity`, `type`, `status`, `since` (`YYYY-MM-DD`), `change`; empty means all. |
+| `filters` | Collection scope sent to the API. Default `{"status":"ACTIVE"}` includes all currently published active/future BC events. Add `road_name`, `area_id`, `severity`, `event_type`, `event_subtype`, `bbox`, `created`, `updated` or `in_effect_on` using the official syntax. |
+| `filters.bbox` | Optional `"-123.45,48.99,-122.45,49.49"` (west,south,east,north). Delete it to restore province-wide collection. |
+| `pageSize` / `maxPages` | Default 500 records/page, 20 pages. Max page size is 500. Reaching the cap or any failed page aborts the entire refresh. |
+| `retentionCaptures` | 120 published files by default (roughly 30 days at four/day). Increase up to 1,000 for a larger online archive. Older captures remain in Git commit history, though removed from the current Pages build. |
+| `historyCaptureLimit` | 24 captures loaded per event history by default (up to 120 in the UI). Select or import older captures for further comparison. |
+| `staleHours` | Warn when the newest capture is older than 12 hours. |
 
-## Start a new tool
+Collection scopes are stored with receipts. A scope change deliberately prevents misleading appeared/disappeared comparisons against the prior scope. For a completely different source, add an adapter and tests instead of replacing the DriveBC endpoint with an arbitrary URL.
 
-1. Select **Use this template → Create a new repository**, choose owner `jsdyer`,
-   a unique lowercase name such as `my-tool`, and public visibility.
-2. Clone the new repository. Use Python 3.12+ and Node 24+.
-3. Set the identity, using a slug that matches the repository name:
+## Collection and deployment
 
-```sh
-python3 scripts/init.py my-tool --title "My Tool" --description "Describe what this tool does."
-```
+- GitHub Actions → **Road Pulse · Collect, check and publish** → **Run workflow** → leave `refresh_data` checked to collect immediately.
+- Scheduled at minute 17 every six hours (UTC), subject to GitHub scheduling delays.
+- A `web/config.json` or collector change on `main` also collects. Other pushes build the retained data.
+- No API key or repository secret is needed. Pages uses GitHub Actions; workflows require repository Contents write permission to retain generated captures.
+- Source requests are sequential, with a one-second pause between pages, a 45-second timeout and a strict page cap. The complete response must validate before any published capture changes. Duplicate IDs across pages abort a refresh rather than silently imply missing records.
+- On source failure, the workflow displays a warning and publishes the last good capture. Its old timestamp remains visible. Missing all data is a build failure.
+- The data commit uses a normal fast-forward push. A competing edit causes a visible failure rather than overwriting it.
+- A failed run does not create a capture; a successful empty **complete** feed is a real observation. No prior history is fabricated.
 
-Review the category, tags and icon in `tool.json`. `access: "browser"` tells the main
-catalogue that the tool works immediately without installation. `--owner` supports a different
-GitHub owner, but only projects owned by `jsdyer` inherit the CoolCode domain.
-
-4. Replace the example in `web/` and its tests. Update the privacy explanation,
-   source attribution and README to describe the real tool.
-5. Test and preview:
+Run locally (no build-time network):
 
 ```sh
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -v
 python3 scripts/build.py
-python3 -m http.server 8000 --directory dist
+# Only when collecting fresh data:
+python3 scripts/collect.py
 ```
 
-Open `http://localhost:8000/`. The example trims lines, skips blanks and removes exact
-duplicates, preserving first-seen order and capitalization. It processes the text in tab memory. Update that explanation if your app behaves differently.
+CI additionally runs the Playwright smoke test against the built Pages path. Browser tests use the real initial event fixture plus explicitly synthetic comparison variations, never published as observations.
 
-CI also tests the browser flow and mobile layout at a project subpath. Replace the
-sample assertions in `tests/browser_smoke.py` when implementing your own UI. To run
-that check locally (optional for ordinary preview):
+## Evidence and limits
 
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python3 -m pip install -r tests/browser-requirements.txt
-python3 -m playwright install --with-deps chromium
-python3 tests/browser_smoke.py
-```
+Official references: [DriveBC Open511 help](https://api.open511.gov.bc.ca/help), [BC API specification](https://github.com/bcgov/api-specs/tree/master/open511), [BC data catalogue](https://catalogue.data.gov.bc.ca/dataset/open511-drivebc-api), [Open Government Licence – BC](https://pub.data.gov.bc.ca/license/OGL-vbc2.0.pdf), and [API terms linked by DriveBC](https://www2.gov.bc.ca/gov/content?id=D1EE0A405E584363B205CD4353E02C88).
 
-Playwright is a test-only dependency; the app and its static build do not use it.
+Contains information licensed under the Open Government Licence – British Columbia. Not an official government service and not endorsed by BC. Coverage is the configured feed, not all municipal roads or every real-world incident. Brief incidents can appear and disappear between six-hour captures. DriveBC can revise a record between pages. A missing record, expired estimate or old source timestamp is not evidence of a reopened road. Planned schedules are retained verbatim, including local values without timezone offsets; the UI does not turn them into purported UTC reopening times. Recurring schedules and raw fields remain inspectable. Spatial links use a point or a line's first coordinate only, not the complete affected segment.
 
-## Publish and register
-
-When the actual tool is ready, in the **new tool repository** set **Settings → Pages → Build and deployment →
-Source → GitHub Actions**. Push to `main`, or manually run **Browser tool · Check and
-publish** after enabling Pages. If the initial deployment ran before Pages was enabled,
-enable it and rerun. PRs only check/build and provide a downloadable preview artifact.
-
-Keep `{{VISIT_COUNTER}}` in the page head and `{{ISSUE_LINK}}` in the footer when replacing the starter UI. The build enables these for initialized CoolCode repositories. The shared counter records aggregate opens on coolcode.ca by public tool ID. Toolbox inputs and URL parameters are excluded. The issue link opens a reporting form with the tool already selected.
-
-Keep app-owned asset paths and module imports relative. Check `https://coolcode.ca/my-tool/`.
-Do not add a CNAME or set `coolcode.ca` as this project's custom domain; the account
-site supplies it. Only successful `main` builds deploy.
-
-After verifying the app, copy the reviewed object from `tool.json` into `data/tools.json`
-in [the main site](https://github.com/jsdyer/jsdyer.github.io). Each tool still builds
-independently. Update the hub record when listing metadata changes; the hub is the
-authority for discovery. Ordinary app updates touch only this repository.
-
-The main site separates **Use in your browser** from **Install yourself**. An app
-that asks for a file is still a browser tool. Standalone Linux packages should start
-in their own repositories with their own build/release workflow, rather than copying
-this browser-only scaffold. Their hub record uses `access: "install"`, links to an
-installation guide, and includes `requirements`.
-
-## Files
-
-| Path | Purpose |
-| --- | --- |
-| `tool.json` | Page metadata and a ready-to-copy catalogue record |
-| `web/` | HTML, responsive CSS, DOM interactions and separate model logic |
-| `scripts/build.py` | Escape metadata and build `web/` into `dist/` |
-| `scripts/init.py` | Set a new project's identity |
-| `tests/` | Application and builder tests |
-| `.github/workflows/pages.yml` | Check PRs and publish successful main builds |
-| `AGENTS.md` | Instructions for future coding work |
-
-Namespace optional storage as `coolcode:<tool-id>:<key>`; CoolCode paths share a
-browser origin. Don't save pasted text/uploads by default. Document external APIs
-and send only the information needed for the selected action. Never embed secrets.
-
-Scheduled refresh is opt-in. Validate source data before deploying, display its date,
-and preserve the last good deployment on failure. Public-repository schedules can
-stop after 60 days without repository activity.
-
-Templates don't propagate future edits automatically. Adopt fixes explicitly and
-consider a versioned reusable workflow once several tools confirm the shared process.
-Choose and add the intended software license before distributing a new project.
+No live API calls or secrets run in the public page. The browser fetches the hosted captures and config; imports and filters remain local. CoolCode's shared first-party tool metrics may run when served on CoolCode. Source/map/GitHub links navigate to their respective providers when clicked. Browser error states preserve the last displayed capture.

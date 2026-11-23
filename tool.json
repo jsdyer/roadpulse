@@ -1,16 +1,16 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "roadpulse",
+  "title": "Road Pulse",
+  "description": "Follow BC road incidents, construction and reopening estimates through dated DriveBC captures.",
+  "category": "maps",
+  "tags": ["roads", "DriveBC", "British Columbia", "incidents", "history"],
+  "icon": "route",
+  "url": "/roadpulse/",
+  "source": "https://github.com/jsdyer/roadpulse",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
+    "mode": "snapshot",
+    "detail": "Dated DriveBC Open511 events, collected every six hours. Compare event IDs, source schedules and timing notes without treating disappearance as reopening."
   }
 }

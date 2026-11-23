@@ -1,21 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanLines } from '../web/model.mjs';
-test('trims, removes blanks and preserves first-seen order', () => {
-  assert.deepEqual(cleanLines('  Halifax\nLangley\nHalifax\n\nVancouver  '), {
-    text: 'Halifax\nLangley\nVancouver', count: 3, removed: 1,
-  });
-});
-test('supports Windows and old Mac line endings', () => {
-  assert.equal(cleanLines('a\r\nb\ra').text, 'a\nb');
-});
-test('empty text and whitespace produce an empty result', () => {
-  assert.deepEqual(cleanLines(' \n\t'), { text: '', count: 0, removed: 0 });
-});
-test('preserves case and Unicode', () => {
-  assert.equal(cleanLines('Québec\nquébec\n東京\nQuébec').text, 'Québec\nquébec\n東京');
-});
-test('treats markup as ordinary text', () => {
-  assert.equal(cleanLines('<script>alert(1)</script>\n<script>alert(1)</script>').text, '<script>alert(1)</script>');
-});
-test('rejects non-text input', () => { assert.throws(() => cleanLines(null), TypeError); });
+import fs from 'node:fs';
+import {validateCapture,comparison,filterRows,timingNotes,sourceLink,mapLink,csv,canonical} from '../web/model.mjs';
+const index=JSON.parse(fs.readFileSync(new URL('../web/data/index.json',import.meta.url)));
+const real=JSON.parse(fs.readFileSync(new URL('../web/data/'+index.captures[0].file,import.meta.url)));
+const base={...real,capturedAt:'2026-01-01T00:00:00Z',events:real.events.slice(0,3)};
+const newer=()=>structuredClone({...base,capturedAt:'2026-01-02T00:00:00Z'});
+test('validates the actual source capture and flexible roads',()=>{assert.equal(validateCapture(real),real);const last=real.events.at(-1);const road=last.roads?.[0]?.name;if(road)assert.ok(filterRows(comparison(real,null).rows,{road}).some(r=>r.event.id===last.id));});
+test('matches event IDs; missing records are absence not reopening',()=>{const n=newer();n.events=n.events.slice(1);const r=comparison(n,base);assert.equal(r.comparable,true);assert.equal(r.rows.find(r=>r.event.id===base.events[0].id).change,'absent');assert.match(r.reason,/does not confirm reopening/);});
+test('changed source timestamps alone are not changes; schedules and states are',()=>{const n=newer();n.events[0].updated='2026-01-01T05:00:00Z';assert.equal(comparison(n,base).rows[0].change,'unchanged');n.events[0].schedule={intervals:['2026-01-02T08:00/2026-01-02T10:00']};n.events[0].roads=[{name:'Highway 1',state:'CLOSED'}];const row=comparison(n,base).rows[0];assert.equal(row.change,'changed');assert.ok(row.fields.includes('schedule'));assert.ok(row.fields.includes('roads'));});
+test('does not compare differing collection scopes or future dates',()=>{const n=newer();n.scope={...n.scope,filters:{status:'ACTIVE',road_name:'Highway 9'}};assert.equal(comparison(n,base).comparable,false);assert.equal(comparison(base,newer()).comparable,false);});
+test('object key order does not fabricate changes',()=>{assert.equal(canonical({b:2,a:1}),canonical({a:1,b:2}));});
+test('keeps estimates as source wording without inventing a deadline',()=>{assert.deepEqual(timingNotes({description:'Closed. Estimated reopening at 4pm. Next update at 3pm.'}),['Estimated reopening at 4pm.','Next update at 3pm.']);assert.deepEqual(timingNotes({description:'Road open.'}),[]);});
+test('validates malicious/malformed imports and source links',()=>{const bad=newer();bad.events.push(bad.events[0]);assert.throws(()=>validateCapture(bad),/duplicate/);assert.throws(()=>validateCapture({...base,complete:false}));assert.equal(sourceLink({url:'javascript:alert(1)'}),null);assert.equal(sourceLink({url:'https://evil.example/events/1'}),null);assert.equal(mapLink({geography:{type:'Point',coordinates:[999,49]}}),null);assert.match(mapLink({geography:{type:'Point',coordinates:[-123,49]}}),/openstreetmap.org/);});
+test('CSV preserves text and neutralizes formulas, including absent rows',()=>{const r={event:{...base.events[0],description:'=HYPERLINK("bad")'},change:'absent'};const output=csv([r],base.capturedAt);assert.match(output,/'=HYPERLINK/);assert.match(output,/absent/);assert.match(output,/observed_at/);});
+test('filters optional event fields without throwing',()=>{const e={...base.events[0]};delete e.roads;delete e.areas;delete e.description;assert.equal(filterRows([{event:e,change:'unchanged'}],{query:'no such road'}).length,0);assert.equal(filterRows([{event:e,change:'unchanged'}],{status:e.status}).length,1);});

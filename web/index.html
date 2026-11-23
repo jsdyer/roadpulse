@@ -1,34 +1,14 @@
 <!doctype html>
-<html lang="en-CA">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="{{DESCRIPTION}}">
-  <title>{{TITLE}} · CoolCode</title>
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.mjs"></script>
-  {{VISIT_COUNTER}}
-</head>
-<body data-tool-id="{{TOOL_ID}}">
-  <a class="skip" href="#main">Skip to content</a>
-  <header><a href="https://coolcode.ca/">← CoolCode.ca</a><a href="{{SOURCE_URL}}">Source &amp; instructions ↗</a></header>
-  <main id="main">
-    <p class="eyebrow">Browser tool starter</p>
-    <h1>{{TITLE}}</h1>
-    <p class="intro">{{DESCRIPTION}}</p>
-    <section aria-labelledby="example-title">
-      <h2 id="example-title">Clean a list</h2>
-      <p>Trim spaces, skip blank lines and remove exact duplicates. Capitalization stays distinct.</p>
-      <div class="panels">
-        <div><label for="input">Your lines</label><textarea id="input" rows="10" maxlength="100000" spellcheck="false" placeholder="Paste one item per line"></textarea></div>
-        <div><label for="output">Cleaned lines</label><textarea id="output" rows="10" readonly spellcheck="false"></textarea></div>
-      </div>
-      <div class="actions"><button id="sample" type="button">Load example</button><button id="clear" type="button">Clear</button><button id="copy" type="button" hidden>Copy result</button></div>
-      <p id="status" role="status" aria-live="polite">Paste a list to begin.</p>
-      <noscript><p>This tool needs JavaScript to process your text. The source is available above.</p></noscript>
-    </section>
-    <aside aria-label="Privacy"><strong>Stays on your device.</strong> The browser processes your text in this tab. Reloading clears it.</aside>
-  </main>
-  <footer>Part of <a href="https://coolcode.ca/">the CoolCode collection</a>. {{ISSUE_LINK}}</footer>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{TITLE}} · CoolCode</title><meta name="description" content="{{DESCRIPTION}}"><meta name="color-scheme" content="light"><link rel="stylesheet" href="./style.css">{{VISIT_COUNTER}}<script type="module" src="./app.mjs"></script></head>
+<body data-tool="{{TOOL_ID}}"><a class="skip" href="#explorer">Skip to road events</a><header class="topbar"><a class="brand" href="https://coolcode.ca/">CoolCode<span>.ca</span></a><nav aria-label="Main"><a href="#method">Sources & method</a><a href="{{SOURCE_URL}}">Source code ↗</a></nav></header>
+<main><section class="hero"><div><p class="eyebrow"><span class="live-dot"></span> British Columbia / Road observations</p><h1>Road <em>Pulse.</em></h1><p class="intro">What changed on the road?<br>Keep the report. Follow the next update.</p><p class="hero-note">Dated DriveBC incidents, construction and weather conditions. Search any road in the captured feed, then follow an event through time.</p></div><div class="road-art" aria-hidden="true"><div class="route-number">BC</div><div class="road-lines"><i></i><i></i><i></i><i></i><i></i></div><p>OBSERVE<br>COMPARE<br>KEEP THE RECEIPT</p><span>01 — THE ROAD RECORD</span></div></section>
+<section class="capture-bar" aria-label="Capture status"><div><span class="eyebrow">Latest retained observation</span><p id="capture-time">Loading saved observations…</p><span id="freshness">Scheduled collection every six hours</span></div><div class="capture-actions"><button id="refresh" type="button">Check latest saved capture ↻</button><a class="button secondary" href="https://github.com/jsdyer/roadpulse/actions/workflows/pages.yml">Collect now ↗</a></div></section>
+<p class="notice">Planning a trip? <a href="https://www.drivebc.ca/">Check current conditions at DriveBC ↗</a>. These saved observations are not live routing advice.</p><p id="message" class="message" role="status" aria-live="polite"></p>
+<section class="stats" aria-label="Capture totals"><div><strong id="total-count">—</strong><span>events captured</span></div><div><strong id="major-count">—</strong><span>major severity</span></div><div><strong id="road-count">—</strong><span>named roads</span></div><div><strong id="capture-count">—</strong><span>retained captures</span></div></section>
+<section id="explorer" class="explorer"><div class="section-title"><div><p class="eyebrow">01 / Explore the record</p><h2>Find your stretch of road.</h2></div><div class="export-actions"><button id="save-json" class="secondary" disabled>Save capture JSON ↓</button><button id="save-csv" class="secondary" disabled>Export results CSV ↓</button><button id="import-button" class="secondary" type="button">Import capture ↑</button><input id="import" type="file" accept="application/json,.json" class="file-input" tabindex="-1"></div></div>
+<div class="filters"><label class="search-label">Search the report<input type="search" id="query" placeholder="Road, town, event ID or a phrase…"></label><label>Road or highway<input id="road" list="road-list" placeholder="Any road name"><datalist id="road-list"></datalist></label><label>Area<select id="area"><option value="">All areas</option></select></label><label>Severity<select id="severity"><option value="">All severities</option></select></label><label>Event type<select id="type"><option value="">All types</option></select></label><label>Source status<select id="status"><option value="">All statuses</option><option value="ACTIVE">Active, including planned</option><option value="ARCHIVED">Archived by source</option></select></label><label>Source updated on/after<input type="date" id="since"></label><label>Changes<select id="change"><option value="">All events</option><option value="appeared">Appeared in capture</option><option value="changed">Changed</option><option value="unchanged">Unchanged</option><option value="absent">No longer in capture</option></select></label><button id="reset" class="secondary">Clear filters</button></div>
+<div class="quick-row"><span>Quick searches</span><div id="quick-searches"></div><button id="save-watch" class="text-button">Save this filter view ☆</button></div><div id="watch-list" class="watch-list" aria-label="Saved filter views"></div>
+<div class="comparison-controls"><label>View capture<select id="capture-select" disabled></select></label><span aria-hidden="true">←</span><label>Compare with<select id="compare-select" disabled><option value="">No earlier capture</option></select></label><p id="compare-note">A timeline begins with a first observation.</p></div>
+<div class="results-heading"><p id="result-count" role="status">Loading events…</p><label>Order by<select id="sort"><option value="updated">Most recently updated</option><option value="severity">Severity</option><option value="road">Road name</option></select></label></div><div class="workspace"><div class="event-column"><div id="event-list" class="event-list"></div><button id="more" hidden>Show 50 more events ↓</button></div><aside id="detail" class="detail" aria-label="Event details"><div class="detail-placeholder"><span class="eyebrow">THE DETAIL / EVENT RECEIPT</span><h3>Every update has a trail.</h3><p>Select an event to see the original report, timing notes and changes between captures.</p></div></aside></div></section>
+<section id="method" class="method"><p class="eyebrow">02 / Sources & method</p><div class="method-grid"><div><h2>Observations,<br>not assumptions.</h2><p>Road Pulse retains public <a href="https://api.open511.gov.bc.ca/help">DriveBC Open511</a> records, matching events by their source ID. Captures collect the configured feed every six hours; GitHub scheduling and source availability can delay them.</p><p>Contains information licensed under the <a href="https://pub.data.gov.bc.ca/license/OGL-vbc2.0.pdf">Open Government Licence – British Columbia</a>. Independent CoolCode project; no government endorsement.</p></div><div><h3>Read dates carefully</h3><p><b>Observed</b> means when this tool saved the feed. <b>Source updated</b> is DriveBC’s last modification time. Schedule ends and reopening estimates are plans, not proof that traffic resumed.</p><h3>Disappearance is not reopening</h3><p>“Active” can include future work. “Archived” can mean ceased, outdated or invalid. An event leaving a capture only proves it was absent from that observation. Changes are compared only when collection filters match.</p></div><div><h3>Your roads, your collection</h3><p>Use any road or location in the full BC capture. Saved filter views stay in this browser. Imports are processed locally and are not uploaded. Download receipts to keep them.</p><p>Change <a href="https://github.com/jsdyer/roadpulse/blob/main/web/config.json">config.json</a> to add quick searches, change API filters or bounds, and expand retention. A main-branch config change starts a new collection. <a href="https://github.com/jsdyer/roadpulse#readme">Read the setup guide ↗</a></p><p id="scope-note"></p></div></div></section>
+</main><footer><a class="brand" href="https://coolcode.ca/">CoolCode.ca</a><p>Road Pulse · Public roads, a lasting record.</p><div>{{ISSUE_LINK}} · <a href="{{SOURCE_URL}}">GitHub</a></div></footer><noscript><p class="notice">Enable JavaScript to explore saved road records. Current conditions remain available at <a href="https://www.drivebc.ca/">DriveBC</a>.</p></noscript></body></html>
