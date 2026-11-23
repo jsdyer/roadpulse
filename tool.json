@@ -17,6 +17,7 @@
   "access": "browser",
   "data_info": {
     "mode": "snapshot",
-    "detail": "Dated DriveBC Open511 events, collected every six hours. Compare event IDs, source schedules and timing notes without treating disappearance as reopening."
+    "detail": "Dated DriveBC Open511 events, collected every six hours. Compare event IDs, source schedules and timing notes without treating disappearance as reopening.",
+    "cadence": "Every 6 hours"
   }
 }
