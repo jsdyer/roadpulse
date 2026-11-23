@@ -2,8 +2,14 @@
   "id": "roadpulse",
   "title": "Road Pulse",
   "description": "Follow BC road incidents, construction and reopening estimates through dated DriveBC captures.",
-  "category": "maps",
-  "tags": ["roads", "DriveBC", "British Columbia", "incidents", "history"],
+  "category": "places",
+  "tags": [
+    "roads",
+    "DriveBC",
+    "British Columbia",
+    "incidents",
+    "history"
+  ],
   "icon": "route",
   "url": "/roadpulse/",
   "source": "https://github.com/jsdyer/roadpulse",
