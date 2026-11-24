@@ -72,3 +72,11 @@ No live DriveBC API calls or secrets run in the public page. The browser fetches
 The default basemap follows the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/): visible attribution, exact HTTPS tile URL, browser caching, an explicit `strict-origin-when-cross-origin` referrer policy, zero offscreen tile buffer, and no bulk download, offline tile export, prefetch or background map scans. The map's tile layer is paused outside the visible page area and in background tabs. Use a suitable alternative provider if traffic outgrows the community tile service. Map controls are not a directions engine.
 
 CI substitutes a local blank tile response for **all** OSM tile requests. It checks point and line display, shared filtering, feature selection, hide/show, capture comparison and failed-tile fallback without contacting the community tile service. Node tests check full geometry preservation, malformed-coordinate handling, matching filtered IDs, bounds and absent-event semantics. No historical event data is changed by the map addition.
+
+<!-- schedule-reliability -->
+## Schedule reliability
+
+Public GitHub repositories can have scheduled workflows disabled after 60 days of inactivity. A separate weekly [schedule guard](.github/workflows/schedule-guard.yml) calls GitHub's enable-workflow API for an explicit list of refresh workflows and itself. It can restore workflows disabled for inactivity, preserves manually disabled workflows, and runs independently of collection failures.
+
+This is an interim mitigation, not a scheduling guarantee: GitHub does not document active-workflow renewal as a permanent exemption, and scheduled runs can be delayed or dropped. A scheduler on our own Linux server is the planned independent trigger. The guard does not collect data, create dummy commits, or change source/check timestamps; successful collection and published data freshness still need monitoring.
+<!-- /schedule-reliability -->
